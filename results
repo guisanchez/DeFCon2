@@ -1,0 +1,6 @@
+fric1   2.d-1		! phi_equilibrium \simeq 15º
+fric2   3.3d-2  	! fric2 multiplica a la componente cuadrática de Sf
+E 		0.3337
+fric1   2.d-1		! phi_equilibrium \simeq 15º
+fric2   6.6d-2  	! fric2 multiplica a la componente cuadrática de Sf
+E     0.3082
