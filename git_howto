@@ -1,0 +1,8 @@
+cd ~/2D_Debris-git
+git init
+git clone git@github.com:guisanchez/2D-Debris.git
+git add .
+
+git status
+git commit -m '1st code commit'
+git push origin
