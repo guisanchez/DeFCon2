@@ -46,11 +46,11 @@ if (n1 in no):
     f2.close()
     f1.close()
     noes = noes + 1
-    os.system('echo 0 > err_proc')
+    os.system('echo 0 < err_proc')
 else:
     os.system('cp temp0 temp1')
-    os.system('echo 1 > err_proc')
-    os.system('Did you run preproc_comparador ?')
+    os.system('echo 1 < err_proc')
+    os.system('echo "Did you run preproc_comparador ?"')
 n1 = 'j'
 while (n1 not in ans):
     n1 = raw_input("Need vtk (paraview) output files? (y/n): ")
