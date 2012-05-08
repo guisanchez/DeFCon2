@@ -15,7 +15,7 @@ Requisites for linux users: Make and gfortran compiler.
 2.- Check that an executable file called main2D has been created in your directory. 
 
 Input files
-___________
+-----------
 
 There are 3 required input files: a mesh file, an initial conditions file and a code inputs/options file.
 1.- Mesh
@@ -36,6 +36,7 @@ Where Z(i,j) is the bed height at row i and column j
 
 2.- Initial
 Init file is ASCII as well. 
+
     nvert      	     4
     ncols      	     120
     nrows      	     130
@@ -83,12 +84,12 @@ The code reads a json format file called input.json. Special thanks to @josephal
     	 Name of the inital h file
 
 Run 2D_Debis
-____________
+------------
 
 Run the file generated after make. Type ./main_2D
 
 Watch your result!
-__________________
+------------------
 
 Requisites: paraview
 
