@@ -55,7 +55,7 @@ Where h(i,j) is the debris depth at row i and column j
 
 3.- Inputs/options file.
 
-The code reads a json format file called input.json. Special thanks to @josephalevin, who developed the fortran library we are using. Several data are read from input.json:
+The code reads a json format file called input.json. Special thanks to [@josephalevin](https://github.com/josephalevin/fson), who developed the fortran library we are working with. Several data are read from input.json:
 
     time data:
     	 cfl (real number)  
