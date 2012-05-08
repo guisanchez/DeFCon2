@@ -1,4 +1,4 @@
-2D_Debris
+2D-Debris
 =========
 
 Debris flow simulation code. Current status: ... in progress...
@@ -6,19 +6,21 @@ Debris flow simulation code. Current status: ... in progress...
 Shallow water equations are taken to solve numerically the dynamic of debris flow and avalanches. The numerical method is upwind and first order.
 
 
-Compile 2D_Debris
-_________________
+Compile 2D-Debris
+-----------------
 
 Requisites for linux users: Make and gfortran compiler. 
 
-1.- Get into the 2D-Debris folder. Run makefile (Type make in terminal).
-2.- Check that an executable file called main2D has been created in your directory. 
+* Get into the 2D-Debris folder. Run makefile (Type make in terminal).
+* Check that an executable file called main2D has been created in your directory. 
 
 Input files
 -----------
 
 There are 3 required input files: a mesh file, an initial conditions file and a code inputs/options file.
+
 1.- Mesh
+
 The code reads ASCII mesh files. The format is:
 
     nvert      	     4
@@ -35,6 +37,7 @@ The code reads ASCII mesh files. The format is:
 Where Z(i,j) is the bed height at row i and column j
 
 2.- Initial
+
 Init file is ASCII as well. 
 
     nvert      	     4
@@ -51,7 +54,9 @@ Init file is ASCII as well.
 Where h(i,j) is the debris depth at row i and column j
 
 3.- Inputs/options file.
+
 The code reads a json format file called input.json. Special thanks to @josephalevin, who developed the fortran library we are using. Several data are read from input.json:
+
     time data:
     	 cfl (real number)  
 	     Courant number for the time step
