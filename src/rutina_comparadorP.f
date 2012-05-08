@@ -1,4 +1,4 @@
-      subroutine comparador(U,celda,sum2)
+      subroutine comparador(U,celda,sum2,malla)
 
       implicit none
 
@@ -20,31 +20,35 @@ C      parameter(factor=1.152d0)
       double precision ymax2,ymin1,ymin2
       double precision, dimension (:,:), allocatable :: fin
       double precision ar(500000)
-      character*40 aux
+      character*40 aux,malla,proc_file
       double precision dist, distmin,wet,x,y
       integer n
       double precision h, dif, diftot,dx
       integer i,j,l
-
+      logical file_exists
       double precision, dimension (:), allocatable :: depth
+      
+      proc_file = 'h_obs_proc.dat'
 
       xmax2 = -1.d+6
       ymax2 = -1.d+6
       xmin2 = 1.d+6
       ymin2 = 1.d+6
 
-      open(11,file='err_proc')
-      read(11,*) i
-      close(11)
+C      open(11,file='err_proc')
+C      read(11,*) i
+C      close(11)
+ 
+      inquire(file=proc_file,EXIST=file_exists)
 
       factor = 1.d0
-      if (i.eq.1) then
-
-         open(2,file='h_obs_proc.dat',form='UNFORMATTED')
+C      if (i.eq.1) then
+      if(file_exists) then
+         open(2,file=proc_file,form='UNFORMATTED')
          read(2) sum1,ave
          factor = sum1/sum2
          factor = 1.d0
-         open(unit=1,file='malla0.txt')
+         open(unit=1,file=malla)
          read(1,*) aux
          read(1,*) aux, ncx2
          read(1,*) aux, ncy2
@@ -131,7 +135,7 @@ C         close(1)
          endif
 !     !      write(*,*) sum1
 
-         open(unit=1,file='malla0.txt')
+         open(unit=1,file=malla)
          read(1,*) aux
          read(1,*) aux, ncx2
          read(1,*) aux, ncy2

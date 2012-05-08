@@ -1,6 +1,6 @@
 
       subroutine read_mesh2D(node,celda,hw,vw,hwn,vwn,cellw,cellnod,Z,U
-     +     ,ncp)
+     +     ,ncp,malla,hini)
 
       implicit none
 
@@ -26,11 +26,12 @@ C      double precision cellvar(nc,nvar)
 
       integer hw(nhw,2),vw(nvw,2),hwn(nhw,2),vwn(nvw,2)
       integer pared(nhw+nvw,2)
-      character *40 achar
 C     hw = horizontal wall, vw = vertical wall 
 C     hw(i,1:2) are cells over and below horizontal wall 'i' 
 C     hwn = horizontal wall nodes, vwn = vertical wall nodes
 C     vwn(j,1:2) are nodes that determine vertical wall 'j'
+      character *40 achar,malla,hini,procfile
+      logical file_exist
       double precision x_min,x_max,y_min,y_max,dx,dy,eps,xn0,yn0,ynl,xnl
       double precision pi
       parameter (pi = 3.141592653)
@@ -38,14 +39,19 @@ C     vwn(j,1:2) are nodes that determine vertical wall 'j'
       integer piz,ps,pld,pli
       integer ncp
       
-      open(11,file='preproc')
+C      open(11,file='preproc')
+C      read(11,*) preproc
+C      close(11)
       
-      read(11,*) preproc
+      procfile = 'proc_mesh.dat'
       
-      close(11)
-      if (preproc.eq.1) then
+      inquire(file=procfile, EXIST=file_exist)
+
+
+C      if (preproc.eq.1) then
+      if (file_exist) then
 C         write(*,*) 'Reading proccessed mesh from binary file'
-         open(10,file='proc_mesh.dat',form='UNFORMATTED')
+         open(10,file=procfile,form='UNFORMATTED')
 C         write(*,*) 'reading node positions'
          do i = 1, nn
             read(10) node(i,1:2)
@@ -84,7 +90,7 @@ C         write(*,*) 'reading cell Z'
          enddo
          close(10)
 C         write(*,*) 'opening init0.txt'
-         open(2,file='init0.txt')
+         open(2,file=hini)
          do i = 1, 7
             read(2,*)
          enddo
@@ -128,8 +134,8 @@ C      write(*,*) nc,nn,nnx,nny,nvert,nvar
 C      write(*,*) nvw, nhw
 C      stop
 
-         open(unit=1,file='malla0.txt')
-         open(unit=2,file='init0.txt')
+         open(unit=1,file=malla)
+         open(unit=2,file=hini)
 C     Read number of vert
          read(1,*) achar,nvert
          read(2,*)

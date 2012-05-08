@@ -2,14 +2,19 @@ C     VERSION DE OPTIMIZACION DE PARAMETROS DE ENTRADA
 C     ELIMINAR LOS C!C SI SE QUIERE ESCRIBIR FICHEROS DE SALIDA
 C     ELIMINAR LOS !!C SI SE QUIERE VER LA SALIDA ESTÁNDAR
 
-!> @file main.f
-!< @param nc
-!! @todo probando doxygen
+!> @file main2D.f
+!> @brief Main file.
+!! Cuerpo principal del programa
+!> @author Guillermo Sánchez and Javier Burguete
+!> @version 1.0
+!! todo probando doxygen
 
       program Debris_2D
 
-      implicit none
+      use fson
 
+      implicit none
+      !> Declarando variables
       integer i,j,l,lc,rc
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     Number of dimensions and number of cell variables
@@ -74,38 +79,72 @@ C     Other variables
 
       double precision h_min
       double precision suma0,suma
-      integer flag,l_print
+      integer flag,l_print,p_err,p_mesh
+      common /preproc/ p_err,p_mesh
       double precision fric1,fric2, fr_hmin, fr_qmin
       common /friction/ fric1, fric2,fr_hmin,fr_qmin
       common /genvars/ g,k,cfl,h_min,l_print
+
       character*40 achar
       integer c_sup,c_inf,c_izda,c_dcha,ncall
       double precision thrsld,mu,Ek,Fr,mumax
       integer fin
       integer ncp ! Number of cells Z > 0
-      
+      real aux
+      integer stdout, comp, vtk
+      character*40 malla, hini, input
+      type(fson_value), pointer :: value
+
+      stdout = 1
+      comp = 1
+      vtk = 1
+
+      if (command_argument_count().ne.1) then
+         input = "input.json"
+      else
+         i = 1
+         call get_command_argument(i,input)
+      endif
+
+      value => fson_parse(input)
+      call fson_get(value,"time.cfl",aux)
+      cfl = dble(aux)
+      call fson_get(value,"time.end",aux)
+      t_end = dble(aux)
+      call fson_get(value,"time.vtklag",aux)
+      t_w = dble(aux)
+      call fson_get(value,"time.stdprint",l_print)
+      call fson_get(value,"params.tanphi",aux)
+      fric1 = dble(aux)
+      call fson_get(value,"params.Xi",aux)
+      fric2 = dble(aux)
+      call fson_get(value,"params.k",aux)
+      k = dble(aux)
+      call fson_get(value,"preproc_mesh",p_mesh)
+      call fson_get(value,"preproc_err",p_err)
+      call fson_get(value,"standard_out",stdout)
+      call fson_get(value,"compare_result",comp)
+      call fson_get(value,"generate_vtk",vtk)
+      call fson_get(value,"mesh",malla)
+      call fson_get(value,"h_initial",hini)
+      call fson_destroy(value)
+
       fin = 0
       h_min = 1.d-2
       nvar = 3
-      k = 1.d0
-
-      open(1,file='params.txt')
-      read(1,*) fric1
-      read(1,*) fric2
-C      read(1,*) k
-      close(1)
 
       fr_hmin = 1.d-2
       fr_qmin = 1.d-8
-
+      
       flag = 0
       t = 0.d0
-      t_end = 300.0
-      t_w = 5.d0
-      t_wn = t_w
-      l_print = 50
+
+      if (vtk.eq.1) then
+         t_wn = t_w
+      else
+         t_wn = t_end
+      endif
       
-      cfl = 0.9
       g = 9.8
 
 
@@ -115,7 +154,7 @@ C     Allocate arrays        C
 C                            C
 C============================C
 
-      open(unit=1,file='malla0.txt')
+      open(unit=1,file=malla)
       read(1,*) achar,nvert
       read(1,*) achar, ncx
       read(1,*) achar, ncy
@@ -147,7 +186,8 @@ C                                             C
 C=============================================C
  
       
-      call read_mesh2D(node,celda,hw,vw,hwn,vwn,cellw,cellnod,Z,U,ncp)
+      call read_mesh2D(node,celda,hw,vw,hwn,vwn,cellw,cellnod,Z,U,ncp,
+     +     malla,hini)
 
 
 CCCCCCCCCCCCCCCCCCCCCCCCC
@@ -197,6 +237,11 @@ C     Go to conservative formulation        C
 C                                           C
 C===========================================C
 
+C                              C      
+C     Apply mass factor now    C
+C         U = U * 1.15         C
+C                              C
+
       do j = 1, nc
          U(j,1) = U(j,1) * 1.15d0
       enddo
@@ -234,24 +279,28 @@ C                 Time Loop                 C
 C                                           C
 C===========================================C
       l = 0
-      ncall = 0
-!      call write_plt(U,Z,celda,ncall,fin,ncp)
-      ncall = ncall + 1
-C      stop
+      if (vtk.eq.1) then
+         ncall = 0
+         call write_plt(U,Z,celda,ncall,fin,ncp)
+         ncall = ncall + 1
+      endif
+
 
       do while (t < t_end)
-         if (mod(l,l_print).eq.0) then
-!            write(*,*) '===================================='
-!            write(*,*) 'paso l=',l
-         endif
-         if (abs(t-t_wn).lt.1.d-5) then
-!            call write_plt(U,Z,celda,ncall,fin,ncp)
-            ncall = ncall + 1
-            t_wn = t_wn + t_w
-         endif
-         
 
-C         if (l.gt.36) stop
+         if (stdout.eq.1) then
+            if (mod(l,l_print).eq.0) then
+               write(*,*) '===================================='
+               write(*,*) 'paso l=',l
+            endif
+         endif
+         if (vtk.eq.1) then
+            if (abs(t-t_wn).lt.1.d-5) then
+               call write_plt(U,Z,celda,ncall,fin,ncp)
+               ncall = ncall + 1
+               t_wn = t_wn + t_w
+            endif
+         endif
 
          l= l +1
 
@@ -325,12 +374,12 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
             c_dcha =vw(cellw(j,3),2)
             flag = c_inf*c_sup*c_izda*c_dcha
 !!C            if ((U(j,1).gt.1.d-10).and.(flag.eq.0)) then
-!!!C               write(*,*) 'Se derramó fuera'
-!!!C               write(*,*) 'E = -100000'
+!!C               write(*,*) 'Se derramó fuera'
+!!C               write(*,*) 'E = -100000'
 !!C               open(111,file='Nash_Sutcliffe',POSITION='APPEND')
 !!C               write(111,*) 1000000.0,fric1, fric2
 !!C               close(111)
-!!!C               write(*,*) 1000000.0
+!!C               write(*,*) 1000000.0
 !!C               stop
 !!C            endif
 
@@ -339,7 +388,7 @@ C     CALADOS NEGATIVOS : SALIDA POR PANTALLA     C
 CcccccccccccccccccccccccccccccccccccccccccccccccccC
 
 CC            if (U(j,1).lt.0.d0) then
-!CC               write(*,*) 'Celda',j,'(',celda(j,1:2),'):',U(j,1)
+CC               write(*,*) 'Celda',j,'(',celda(j,1:2),'):',U(j,1)
 CC            endif
 
 CMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMC
@@ -380,21 +429,32 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C!C         write(33,*) t,l,Ek,mumax
 C!C         write(100,*) t,'Error de masa =',(suma-suma0)/suma0*100.d0,'%'
 C!C         write(100,*) '          ',suma
-         if (mod(l,l_print).eq.0) then
-!            write(*,*) l,t,dt
-!            write(*,*) '     ',Ek,(suma-suma0)/suma0*100.d0,'%'
+         if (stdout.eq.1) then
+            if (mod(l,l_print).eq.0) then
+               write(*,*) l,t,dt
+               write(*,*) '     ',Ek,(suma-suma0)/suma0*100.d0,'%'
+            endif
          endif
          if ((t.gt.200).and.(Ek.lt.100.d0)) then
-!            write(*,*) 'Stopped mass'
+            if (stdout.eq.1) write(*,*) 'Stopped mass'
             fin = 1
-!            call write_plt(U,Z,celda,ncall,fin,ncp)
-!            call comparador(U,celda,suma)
+            if (vtk.eq.1) then
+               call write_plt(U,Z,celda,ncall,fin,ncp)
+            endif
+            if (comp.eq.1) then
+               call comparador(U,celda,suma,malla)
+            endif
             goto 219
          endif
       enddo
+
       fin = 1
-!      call write_plt(U,Z,celda,ncall,fin,ncp)
-!      call comparador(U,celda,suma)
+      if (vtk.eq.1) then
+         call write_plt(U,Z,celda,ncall,fin,ncp)
+      endif
+      if (comp.eq.1) then
+         call comparador(U,celda,suma,malla)
+      endif
       
  219  continue
 C!C      close(33)
@@ -417,6 +477,6 @@ C!C      close(33)
       deallocate(hwn,vwn)
       deallocate(cellw)
       
-!!!      write(*,*) 'hecho'
+!!      write(*,*) 'hecho'
 
       end

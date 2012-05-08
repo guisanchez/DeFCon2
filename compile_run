@@ -1,1 +1,0 @@
-gfortran main2D.f calc_paredes2D_Sf_fix3.f matprod.f read_regmesh2DP.f compute_Sf2D.f method2Drd.f out_vtk.f rutina_comparadorP.f -O3 -Wall -o main2D && time ./main2D

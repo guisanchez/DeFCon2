@@ -1,3 +1,0 @@
-300.0	t_end
-5.0 	t_window  (time leght between file output)
-50	print_step (Number of time steps between standart output)

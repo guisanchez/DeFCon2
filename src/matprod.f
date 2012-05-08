@@ -1,3 +1,11 @@
+!> @file matprod.f
+
+
+!> subroutine matprod(m1,m2,m3,MP,n)
+!> @brief Producto de 3 matrices
+!> @param m1
+!> @brief Matriz 1 ...
+
       subroutine matprod(m1,m2,m3,MP,n)
       
       implicit none
