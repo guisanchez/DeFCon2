@@ -100,7 +100,7 @@ C     Other variables
       vtk = 1
 
       if (command_argument_count().ne.1) then
-         input = "input.json"
+         input = "input.js"
       else
          i = 1
          call get_command_argument(i,input)
