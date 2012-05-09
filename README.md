@@ -61,37 +61,32 @@ You may find some examples in the [2d-debris project page ](http://guisanchez.gi
 
 The code reads a json format file called input.json. Special thanks to [@josephalevin](https://github.com/josephalevin/fson), who developed the fortran library we are working with. Several data are read from input.json:
 
-    time data:
-    	 cfl (real number)  
-	     Courant number for the time step
-	 end (real number)
-	     Simulation (max) lenght of time
-	 vtklag (real number)
-	     Simulated time between vtk outputs
-	 stdprint (integer)
-	     Number of time steps between standard out
-    parameters data:
-	 tanphi (real number)
-	 	Friction expression: equilibrium slope
-	 Xi (real number)
-                Friction expression: dynamic component
-	 k (real number)
-                Debris flow dynamics: Earth pressure term.
-    preproc_mesh (integer)
-	 1 if mesh has already been processed and there exist a binary mesh file
-    preproc_err (integer)
-    	 1 if expected values file has been processed and written to a binary file
-    standard_out (integer)
-         1 if you want the code to print standard outputs
-    compare_result (integer)
-         1 if you have (expected) data to compare with your final output
-    generate_vtk (integer) 
-         1 if you want the code to write vtk files (eg for data visualization)
-    mesh (string)
-    	 Name of the mesh file
-    h_initial (string)
-    	 Name of the inital h file
+	{
+    	"time" : 
+    	{
+		"cfl": 0.9,
+		"end": 300.0,
+		"vtklag": 5.0,
+		"stdprint": 50
+    	},
+    	"params" : 
+    	{
+		"tanphi": 0.226295,
+		"Xi": 0.004888,
+		"k": 1.0
+    	},
+    	"preproc_mesh": 1,
+    	"preproc_err": 1,
+    	"standard_out": 1,
+    	"compare_result": 0,
+    	"generate_vtk": 1,
+    	"mesh": "malla0.txt",
+    	"h_initial": "init0.txt"
+	}
+    	
+Further details on this file in soon available in the [2d-debris project page ](http://guisanchez.github.com/2D-Debris/).
 
+    
 Run 2D_Debis
 ------------
 
