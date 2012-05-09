@@ -14,6 +14,8 @@ Requisites for linux users: Make and gfortran compiler.
 * Get into the 2D-Debris folder. Run makefile (Type make in terminal).
 * Check that an executable file called main2D has been created in your directory. 
 
+Windows users should wait. 
+
 Input files
 -----------
 
@@ -52,6 +54,8 @@ Init file is ASCII as well.
     h(nrows,1:ncols)
 
 Where h(i,j) is the debris depth at row i and column j
+
+You may find some examples in the [2d-debris project page ](http://guisanchez.github.com/2D-Debris/).
 
 3.- Inputs/options file.
 
@@ -96,6 +100,6 @@ Run the file generated after make. Type ./main_2D
 Watch your result!
 ------------------
 
-Requisites: paraview
+Requisites: [paraview](http://www.paraview.org)
 
 If you generated vtk files in your run, you may watch them with paraview
