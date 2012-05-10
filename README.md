@@ -64,7 +64,7 @@ The code reads the [JSON](http://www.json.org/) file `input.js`. Special thanks 
     {
       "time" :
         {
-          "cfl"       : 0.9,
+          "cfl"      : 0.9,
           "end"      : 300.0,
           "vtklag"   : 5.0,
           "stdprint" : 50
