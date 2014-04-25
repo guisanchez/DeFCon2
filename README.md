@@ -62,7 +62,7 @@ You may find some examples in the [DeFCon2 project page ](http://guisanchez.gith
 The code reads a json format file called input.json. Special thanks to [@josephalevin](https://github.com/josephalevin/fson), who developed the fortran library we are working with. Several data are read from input.json:
 
     {
-    	"time" : 
+    	"time": 
     	{
 		"cfl": 0.9,
 		"end": 300.0,
@@ -70,7 +70,7 @@ The code reads a json format file called input.json. Special thanks to [@josepha
 		"stdprint": 50
     	},
     	"friclaw": "voellmy",
-    	"params" : 
+    	"params": 
     	{
 		"tanphi": 0.226295,
 		"Xi": 0.004888,
@@ -83,7 +83,7 @@ The code reads a json format file called input.json. Special thanks to [@josepha
     	"generate_vtk": 1,
     	"mesh": "malla0.txt",
     	"h_initial": "init0.txt",
-	"stop" :
+	"stop":
     	{
 		"stime" : 100.0,
 		"Ekstop" : 10000.0
