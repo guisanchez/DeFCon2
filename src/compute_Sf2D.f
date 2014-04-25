@@ -4,32 +4,61 @@
 
       integer w,nhw,nvar
       double precision Sff,Sf(nvar),c2t,dx,dL
-
-      double precision c1,c2,u2,h,q,qx,qy,g,k,cfl
-      double precision fric1,fric2,fr_hmin,fr_qmin
-      common /friction/ fric1, fric2,fr_hmin,fr_qmin
+      integer frstyle
+      double precision c1,c2,c3,u2,h,q,qx,qy,qm,g,k,cfl
+      double precision fric1,fric2, fric3,fr_hmin,fr_qmin,rho
+      common /friction/ fric1, fric2,fric3,frstyle,fr_hmin,fr_qmin,rho
       common /genvars/ g,k,cfl
 
+      qm = sqrt(qx*qx+qy*qy)
 
+      if (frstyle.le.2) then
+         c1 = fric1
+         c2 = fric2
+      else 
+         c1 = fric1
+         c2 = fric2
+         c3 = fric3
+      endif
 
-      c1 = fric1
-      c2 = fric2
-      
       if (w.le.nhw) then 
          q = qy
       else
          q = qx
-       endif
-
-      if (h.gt.fr_hmin) then
-         u2 = q*q/(h*h)
-         Sff = c1 + c2*u2/h
-      else
-         u2 = 0.d0
-         Sff = c1 !0.d0
       endif
+
+C      if (qm.gt.1.d-6) then
+C         c1 = c1 * q / qm
+C      else
+C         c1 = 0.d0
+C      endif
+      if (frstyle.eq.1) then
       
-      Sff = Sff*g*c2t*h*dx*dL*0.5d0
+         if (h.gt.fr_hmin) then
+            u2 = qm*qm/(h*h*h)
+            Sff = c1 + c2*u2
+         else
+            u2 = 0.d0
+            Sff = c1            !0.d0
+         endif
+
+      else if (frstyle.eq.2) then
+         if (h.gt.fr_hmin) then
+            u2 = 3.d0*c2*qm/(h*h)
+            Sff = 1.d0/(h*rho)*(3.d0/2.d0*c1 + u2)
+         else
+            Sff = 0.d0
+         endif
+      else if (frstyle.eq.3) then
+         if (h.gt.fr_hmin) then
+            u2 = 3.d0*c3*qm/(h*h)
+            Sff = c1 + 1.d0/(h*rho)*(3.d0/2.d0*c1 + u2)
+         else
+            Sff = c1
+         endif
+      endif
+
+      Sff = Sff*g*c2t*h*dx*dL!*0.5d0
 
       Sf(1) = 0.d0
 

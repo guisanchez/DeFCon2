@@ -39,7 +39,8 @@
       
       double precision Sfric(nhw+nvw),fac(nhw+nvw),fac0
       double precision Sfmax(nhw+nvw),ex_n,ex_p,suma
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      double precision fwall(nhw+nvw)
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     Corrección "entrópica"     C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       double precision visc, l1_l,l1_r,l2_r,l2_l,l3_l,l3_r,vaux
@@ -93,8 +94,10 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
             vbar = 0.d0
             theta(1) = (angle(rc,1) + angle(lc,1)) / 2.0
             theta(2) = (angle(rc,2) + angle(lc,2)) / 2.0
-            c2t = cos(theta(1))*cos(theta(1)) +
-     +           cos(theta(2))*cos(theta(2))
+            c2t = 1.d0/(1.d0 + tan(theta(1))*tan(theta(1)) +
+     +           tan(theta(2))*tan(theta(2)))
+C            c2t = cos(theta(1))*cos(theta(1)) +
+C     +           cos(theta(2))*cos(theta(2))
             hbar = (U(lc,1) + U(rc,1)) / 2.0
             cbar = sqrt(hbar*g*k*c2t)
             if ((U(lc,1).ge.1.d-6).and.(U(rc,1).ge.1.d-6)) then
@@ -134,6 +137,10 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
             l_3m = ubar 
          endif
          
+         fwall(i) = max(abs(l_1m),abs(l_2m),abs(l_3m))
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C     If fwall(i) < fwall_min -> no flux across wall 'i'    C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC         
          
          vaux = 0.d0
          
@@ -307,7 +314,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     Cálculo por paredes      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-         if (pared(i,1)*pared(i,2).ne.0) then ! Si los dos vecinos existen
+         if ((pared(i,1)*pared(i,2).ne.0).and.(fwall(i).gt.1.d-10)) then ! Si los dos vecinos existen (y hay sustancia)
             lc = pared(i,1)     ! Vecino 1
             rc = pared(i,2)     ! Vecino 2
             
@@ -550,6 +557,11 @@ C                          vertical
             endif
             if ((U(lc,1).ge.1.d-6).or.(U(rc,1).ge.1.d-6)) then  
                call compute_Sf2D(u1,u2,u3,nvar,S,dx,dL,c2t,i,nhw)
+
+C               if (((lc.eq.477).or.(rc.eq.477)).and.(i.gt.nhw)) then
+                  
+C                  write(*,*) 'call compute sf',S(1:3)
+C               endif
                
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     CALCULANDO CORRECTOR   (+)  C
@@ -561,18 +573,30 @@ C@@@@@@@@@@@@@@@@@@@@@@@@@@@@C
 CCCCCCCCCCCCCCCCCCCCCCCCCC
 C  Paredes horizontales  C     
 CCCCCCCCCCCCCCCCCCCCCCCCCC
-               if (i.le.nhw) then
-                  qps = 0.5d0*(U(lc,3) + U(rc,3) + dt/(dL*dx)*(
+               u2 = 0.5d0*(U(lc,2) + U(rc,2) + dt/(dL*dx)*(
+     +                 dUp(cellw(lc,4)+nhw,2,1) + dUn(i,2,1) + 
+     +                 dUp(i,2,1) + dUn(cellw(rc,3)+nhw,2,1)))
+               u3 = 0.5d0*(U(lc,3) + U(rc,3) + dt/(dL*dx)*(
      +                 dUp(cellw(lc,1),3,1) + dUn(i,3,1) + 
      +                 dUp(i,3,1) + dUn(cellw(rc,2),3,1)))
+               if (i.le.nhw) then
+                  qps = u3
+                  if (u2*u2+u3*u3.gt.1.d-20) then
+                     S = -S*u3/sqrt(u2*u2+u3*u3)
+                  else
+                     S = 0.d0
+                  endif
                   Sfmax(i) = Sfmax(i) + 0.5*dx*dL*(U(lc,3) + 
      +                 U(rc,3))/dt
                else
-                  j = i - nhw
-                  qps = 0.5d0*(U(lc,2) + U(rc,2) + dt/(dL*dx)*(
-     +                 dUp(cellw(lc,4)+nhw,2,1) + dUn(i,2,1) + 
-     +                 dUp(i,2,1) + dUn(cellw(rc,3)+nhw,2,1)))
-                  qps = qps
+C                  j = i - nhw
+                  qps = u2
+                  if (u2*u2+u3*u3.gt.1.d-20) then
+                  S = -S*u2/sqrt(u2*u2+u3*u3)
+                  else
+                     S = 0.d0
+                  endif
+
                   Sfmax(i) = Sfmax(i) + 0.5*dx*dL*(U(lc,2) + 
      +                 U(rc,2))/dt
                endif
@@ -580,8 +604,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCC
                if (abs(qps).gt.1.d-11) then
                   Sfmax(i) = sign(Sfmax(i),-qps)
                   do l = 1, nvar
-                     S(l) = sign(S(l),-qps)
-                     if (S(l)*(Sfmax(i)).le.0.d0) then
+                     if (S(l)*Sfmax(i).le.0.d0) then
                         S(l) = 0.d0
                      else if (S(l).gt.0.d0) then
                         S(l) = min(S(l),Sfmax(i))
@@ -617,6 +640,13 @@ C     +           (dUp(i,3,1).eq.0.d0)) S(1:3) = 0.d0
                dUp(i,2,2) = dUp(i,2,2) + MPp(i,2,j)*S(j)
                dUp(i,3,2) = dUp(i,3,2) + MPp(i,3,j)*S(j)
             enddo
+
+C            if (((lc.eq.477).or.(rc.eq.477)).and.(i.gt.nhw)) then
+C               write(*,*) 'wall',i,'cells',lc,rc, 'dUp',dUp(i,2,2)
+C               write(*,*) 'Sf=',S(1:3)
+C            endif
+
+            
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     CALCULANDO CORRECTOR   (-)  C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
