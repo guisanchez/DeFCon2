@@ -82,7 +82,7 @@ The code reads a json format file called input.json. Special thanks to [@josepha
     	"generate_vtk": 1,
     	"mesh": "malla0.txt",
     	"h_initial": "init0.txt",
-	"stop :
+	"stop" :
 	{
 		"stime": 100.0,
 		"Ekstop": 10000.0
