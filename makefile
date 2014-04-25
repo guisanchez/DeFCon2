@@ -5,8 +5,8 @@ cc = gfortran
 obj_lib = $(fson)fson_string_m.o $(fson)fson_value_m.o $(fson)fson_path_m.o \
 	$(fson)fson.o
 obj_main = $(src)main2D.o $(src)calc_paredes2D_Sf_fix3.o $(src)method2Drd.o \
-	$(src)matprod.o $(src)compute_Sf2D.o $(src)read_regmesh2DP.o \
-	$(src)rutina_comparadorP.o $(src)out_vtk.o
+	$(src)matprod.o $(src)compute_Sf2D.o $(src)readw_regmesh2DP.o \
+	$(src)rutina_comparadorPSBC.o $(src)out_vtk.o
 
 main2D: $(fson)libfson.a $(obj_main) makefile
 	$(cc) -o main2D $(obj_main) $(fson)libfson.a
@@ -42,12 +42,12 @@ $(src)matprod.o: $(src)matprod.f makefile
 $(src)compute_Sf2D.o: $(src)compute_Sf2D.f makefile
 	$(cc) $(cflags) $(src)compute_Sf2D.f -o $(src)compute_Sf2D.o
 
-$(src)read_regmesh2DP.o: $(src)read_regmesh2DP.f makefile
-	$(cc) $(cflags) $(src)read_regmesh2DP.f -o $(src)read_regmesh2DP.o
+$(src)readw_regmesh2DP.o: $(src)readw_regmesh2DP.f makefile
+	$(cc) $(cflags) $(src)readw_regmesh2DP.f -o $(src)readw_regmesh2DP.o
 
-$(src)rutina_comparadorP.o: $(src)rutina_comparadorP.f makefile
-	$(cc) $(cflags) $(src)rutina_comparadorP.f \
-		-o $(src)rutina_comparadorP.o
+$(src)rutina_comparadorPSBC.o: $(src)rutina_comparadorPSBC.f makefile
+	$(cc) $(cflags) $(src)rutina_comparadorPSBC.f \
+		-o $(src)rutina_comparadorPSBC.o
 
 $(src)out_vtk.o: $(src)out_vtk.f makefile
 	$(cc) $(cflags) $(src)out_vtk.f -o $(src)out_vtk.o
