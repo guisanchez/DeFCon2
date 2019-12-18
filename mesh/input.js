@@ -6,6 +6,7 @@
 	"vtklag": 1.0,
 	"stdprint": 10
     },
+    "friclaw": "Voellmy",
     "params" : 
     {
 	"tanphi": 0.1,
@@ -18,6 +19,10 @@
     "compare_result": 0,
     "generate_vtk": 1,
     "mesh": "examplemesh1.txt",
-    "h_initial": "exampleinitial1.txt"
+    "h_initial": "exampleinitial1.txt",
+    "stop" :
+    {
+	"stime" : 100.0,
+	"Ekstop" : 10000.0
+    }
 }
-	
